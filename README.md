@@ -1,4 +1,7 @@
 # Optimized Route Recommendation System for Taxi Drivers in Daejeon
+![Preview](./images/1.png)
+![Preview](./images/2.png)
+![Preview](./images/3.png)
 
 # 연구결과물 설명
 
