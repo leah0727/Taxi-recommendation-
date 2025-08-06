@@ -1,58 +1,64 @@
 # Optimized Route Recommendation System for Taxi Drivers in Daejeon
+
+<a href="https://yeongeun-ra-2025.netlify.app/files/17_taxi_pre.pdf">
+  <img src="https://img.shields.io/badge/Report-PDF-red?style=for-the-badge&logo=adobeacrobatreader" width="230">
+</a>
+
 # PROJECT SUMMARY
+## 1. Data
+- **Data Used**: Taxi operation data in Daejeon from April 2023 to March 2024
 
-# 연구결과물 설명
-
-## 1. 데이터
-- **활용 데이터**: 2023년 4월부터 2024년 3월까지의 대전 시내 택시 영업 내역 데이터
-
-  * 데이터 경로: 
+  * **Data Paths**:
     - `data/processed/weekday_clusted.csv`
     - `data/processed/friday_clusted.csv`
     - `data/processed/weekend_clusted.csv`
   
-  * 추가 데이터: 
-    - `data/extra/인기관광지_위도경도.csv`
-    - `data/extra/택시승강장_위도경도.csv`
+  * **Additional Data**:
+    - `data/extra/popular_tourist_spots_latlong.csv`
+    - `data/extra/taxi_stands_latlong.csv`
   
-  * 특성:
-    - 승차X좌표
-    - 승차Y좌표
-    - hour (시간)
-    - 기온(°C)
-    - 강수량(mm)
-    - holiday (공휴일 여부)
+  * **Features**:
+    - Boarding X-coordinate  
+    - Boarding Y-coordinate  
+    - hour (time)  
+    - Temperature (°C)  
+    - Precipitation (mm)  
+    - holiday (holiday indicator)
 
-- **추가 활용 데이터**:
-  - 종관기상관측(ASOS): 기상청 기상자료 개방 포털 (기온, 강수량 정보 활용)
-  - 대한민국 공휴일 데이터
-  - 대전광역시 택시 승강장 현황: 공공 데이터 포털
-  - 대전광역시 인기 관광지 현황: 한국 관광 데이터랩 
+- **Additional Sources**:
+  - ASOS (Automated Synoptic Observation System): Korea Meteorological Administration Open Data Portal (temperature, precipitation)
+  - South Korea Public Holidays Data
+  - Daejeon Taxi Stand Information: Public Data Portal
+  - Daejeon Popular Tourist Spots: Korea Tourism Data Lab
 
-## 2. 모델
-- **클러스터링**: 요일 시간대별 택시 수요 예측을 위한 KMeans 클러스터링 모델
-  - 월~목, 금요일, 주말(토,일) 데이터를 각각 클러스터링
-  - 클러스터 개수: 각 데이터셋별 최적의 클러스터 수 적용 (K=3)
-  
-- **K-최근접 이웃(KNN)**: 입력된 좌표, 시간, 기온, 강수량을 바탕으로 가장 가까운 클러스터를 선택 후 추천
+---
 
-## 3. 학습 및 추론 수행 방법
+## 2. Model
+- **Clustering**: KMeans clustering for taxi demand prediction by day and time  
+  - Separate clustering for Mon–Thu, Friday, and Weekend (Sat, Sun)  
+  - Optimal cluster size for each dataset (K=3)  
 
-1. **모델 선택**: 입력된 요일에 따라 적절한 클러스터링 모델을 선택합니다.
-2. **클러스터링 모델 학습**:
-    - `KMeans` 알고리즘을 사용해 각 요일별로 클러스터링을 수행합니다.
-    - 주중, 금요일, 주말에 대한 클러스터링 모델을 학습하고 저장합니다.
-3. **입력 데이터 처리**: 입력된 좌표, 시간, 기온, 강수량, 공휴일 여부를 표준화합니다.
-4. **클러스터 예측**: 표준화된 입력 데이터를 바탕으로 클러스터 레이블을 예측합니다.
-    - 입력 데이터 (현재 좌표, 시간, 기온, 강수량)를 바탕으로 `KNN` 알고리즘을 사용해 클러스터를 예측합니다.
-5. **추천 위치 제공**: 예측된 클러스터 내에서 가장 빈번한 승차 위치를 추천합니다.
-    - 해당 클러스터 내에서 빈번하게 발생한 상위 10개의 택시 수요 위치를 추천합니다.
-6. **가중치 적용 추천**: 인기 관광지 및 택시 승강장과의 거리 가중치를 고려하여 추천 위치를 재정렬합니다.
-    - 동점일 경우, 택시 승강장 및 관광지 정보를 활용해 가중치를 부여합니다.
+- **K-Nearest Neighbors (KNN)**: Predict the closest cluster based on input coordinates, time, temperature, and precipitation
 
-## 4. 실행환경
-- **언어**: Python 3.8 이상
-* **필수 라이브러리**:
+---
+
+## 3. Training & Inference Steps
+1. **Model Selection**: Choose the appropriate clustering model based on the input day.
+2. **Train Clustering Models**:
+    - Use KMeans algorithm for clustering by day category.
+    - Train and save separate models for weekday, Friday, and weekend.
+3. **Process Input Data**: Standardize the input (coordinates, time, temperature, precipitation, holiday).
+4. **Cluster Prediction**: Predict cluster labels using standardized input data.
+    - Use KNN to assign the input data to the nearest cluster.
+5. **Provide Recommended Locations**: Suggest top 10 most frequent boarding locations in the predicted cluster.
+6. **Apply Weighted Recommendation**: Re-rank suggestions by considering proximity to popular tourist spots and taxi stands.
+    - If ties occur, apply weights using taxi stands and tourist spots data.
+
+---
+
+## 4. Environment
+- **Language**: Python 3.8 or higher  
+- **Required Libraries**:
     - pandas
     - matplotlib
     - seaborn
@@ -60,27 +66,24 @@
     - scikit-learn
     - folium
 
-- **실행 방법**:
-1. 데이터를 준비하고 스크립트를 실행합니다.
-2. `recommend_locations` 또는 `recommend_locations_with_weights` 함수를 호출하여 추천 위치를 확인합니다.
+- **Execution Steps**:
+1. Prepare the data and run the script.
+2. Call `recommend_locations` or `recommend_locations_with_weights` to get recommended locations.
 
-## 5. 사용 예시
+---
+
+## 5. Example Usage
 ```python
-# 입력 예시
+# Input Example
 day = 'Thursday'
 current_coords = [127.436374, 36.332504]
-current_time = 14  # 오후 2시
-current_temp = 20.5  # 현재 기온
-current_rain = 13  # 현재 강수량
+current_time = 14  # 2 PM
+current_temp = 20.5  # Current temperature
+current_rain = 13  # Current precipitation
 
-# 추천 위치 출력
+# Get recommended locations
 top_10_locations = recommend_locations(day, current_coords, current_time, current_temp, current_rain)
 print(top_10_locations)
-
-
-
-
-
 
 
 
